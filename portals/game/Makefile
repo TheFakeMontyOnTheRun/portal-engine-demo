@@ -10,15 +10,10 @@ OBJ=	src/Main.o \
 	src/RendererSDL.o  \
 	src/FixP.o \
 	src/MainMenu.o \
-	src/CarMenu.o \
 	src/3D.o \
 	src/Vec2i.o \
-	src/VisibilityStrategy.o \
-	src/SpyTravel.o \
 	src/Crawler.o \
-	src/Story.o \
-	src/LoadBitmap.o \
-	src/BASIC.o
+	src/LoadBitmap.o
 
 $(TARGET): $(OBJ)
 	$(CC) -o$(TARGET) $(OBJ) $(LDFLAGS)

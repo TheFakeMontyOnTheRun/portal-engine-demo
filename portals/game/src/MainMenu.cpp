@@ -10,25 +10,18 @@
 #include "LoadBitmap.h"
 #include "Engine.h"
 #include "Graphics.h"
-#include "SpyTravel.h"
 
-const char* MainMenu_options[3] = {
-  "Jugar",
-  "Practicar disparos",
-  //  "Practice driving",
-  //"Credits",
-  "Salir"
+const char* MainMenu_options[2] = {
+  "Test",
+  "Quit"
 };
 
-int32_t MainMenu_nextStateNavigation[3] = {
-  kPlayGame,
+int32_t MainMenu_nextStateNavigation[2] = {
   kPracticeCrawling,
-  //  kPracticeDriving,
-  //kHelp,
   kQuit
 };
 
-extern int biggestOption;
+int biggestOption;
 
 int32_t MainMenu_initStateCallback(int32_t tag, void* data) {
   cursorPosition = 0;
@@ -43,7 +36,7 @@ int32_t MainMenu_initStateCallback(int32_t tag, void* data) {
 
   biggestOption = 0;
   
-  for ( int c = 0; c < 3; ++c ) {
+  for ( int c = 0; c < 2; ++c ) {
     auto len = strlen(MainMenu_options[c]);
 
     if (len > biggestOption) {
@@ -60,14 +53,14 @@ void MainMenu_initialPaintCallback(void) {
 
 void MainMenu_repaintCallback(void) {
 
-  uint8_t optionsHeight = 8 * 3;
+  uint8_t optionsHeight = 8 * 2;
   
   graphicsFill( 320 - ( biggestOption * 8),
 		200 - optionsHeight,
 		(biggestOption * 8),
 		optionsHeight, 255);
 
-  for ( int c = 0; c < 3; ++c ) {
+  for ( int c = 0; c < 2; ++c ) {
 
     bool isCursor = (cursorPosition == c ) && ( (currentPresentationState == kConfirmInputBlink1) ||
 							 (currentPresentationState == kConfirmInputBlink3) ||
@@ -81,7 +74,7 @@ void MainMenu_repaintCallback(void) {
 		    8, 0 );
     }
     
-    graphicsDrawTextAt( 40 - biggestOption + 1, (26 - 3) + c, &MainMenu_options[c][0], isCursor ? 200 : 0 );
+    graphicsDrawTextAt( 40 - biggestOption + 1, (26 - 2) + c, &MainMenu_options[c][0], isCursor ? 200 : 0 );
   }
 }
 
@@ -127,14 +120,9 @@ int32_t MainMenu_tickCallback(int32_t tag, void* data) {
       
       break;
     case kCommandDown:
-      cursorPosition = (cursorPosition + 1) % 3;
+      cursorPosition = (cursorPosition + 1) % 2;
       break;
     case kCommandFire1:      
-
-      if ( cursorPosition == 0 ) {
-	initMapGame();
-      }
-      
       nextNavigationSelection = MainMenu_nextStateNavigation[cursorPosition];
       currentPresentationState = kConfirmInputBlink1;
       break;

@@ -19,12 +19,6 @@ void MainMenu_repaintCallback(void);
 int32_t MainMenu_tickCallback(int32_t tag, void* data);
 void MainMenu_unloadStateCallback();
 
-int32_t CarMenu_initStateCallback(int32_t tag, void* data);
-void CarMenu_initialPaintCallback(void);
-void CarMenu_repaintCallback(void);
-int32_t CarMenu_tickCallback(int32_t tag, void* data);
-void CarMenu_unloadStateCallback();
-
 int32_t Crawler_initStateCallback(int32_t tag, void* data);
 void Crawler_initialPaintCallback(void);
 void Crawler_repaintCallback(void);
@@ -47,30 +41,7 @@ enum ECommand {
 enum EGameMenuState {
   kMainMenu,
   kPracticeCrawling,
-  kPlayGame,
-  kHelp,
   kQuit,
-  kDossiersMenu,
-  kInvestigateMenu,
-  kTravelMenu,
-  kStatusMenu,
-  kBASIC,
-  kReadDossier_Sofia,
-  kReadDossier_Ricardo,
-  kReadDossier_Juan,
-  kReadDossier_Pau,
-  kReadDossier_Lina,
-  kReadDossier_Elias,
-  kReadDossier_Carmen,
-  kReadDossier_Jean,
-  kTravelPorto,
-  kTravelLisbon,
-  kTravelMadrid,
-  kTravelBarcelona,
-  kTravelSaarbrucken,
-  kTravelFrankfurt,
-  kTravelCharleroi,
-  kTravelLuxembourg
 };
 
 enum EPresentationState {

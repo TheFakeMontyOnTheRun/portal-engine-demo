@@ -11,15 +11,10 @@ OBJ=	src/Main.o \
 	src/RendererDOS.o  \
 	src/MainMenu.o \
 	src/FixP.o \
-	src/CarMenu.o \
 	src/Vec2i.o \
-	src/VisibilityStrategy.o \
 	src/3D.o \
-	src/SpyTravel.o \
 	src/Crawler.o \
-	src/Story.o \
-	src/LoadBitmap.o \
-	src/BASIC.o
+	src/LoadBitmap.o
 
 $(TARGET): $(OBJ)
 	$(CC) -o$(TARGET) $(OBJ) $(LIBS)

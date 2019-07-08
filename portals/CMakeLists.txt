@@ -10,18 +10,7 @@ include_directories(game/OPL2LPT)
 find_package(SDL REQUIRED)
 
 add_executable(portals
-        game/include/3D.h
-        game/include/Engine.h
-        game/include/FixP.h
-        game/include/Graphics.h
-        game/include/LoadBitmap.h
-        game/include/Renderer.h
-        game/include/SpyTravel.h
-        game/include/Vec2i.h
-        game/include/VisibilityStrategy.h
         game/src/3D.cpp
-        game/src/BASIC.cpp
-        game/src/CarMenu.cpp
         game/src/Crawler.cpp
         game/src/FixP.cpp
         game/src/Graphics.cpp
@@ -29,10 +18,8 @@ add_executable(portals
         game/src/Main.cpp
         game/src/MainMenu.cpp
         game/src/RendererSDL.cpp
-        game/src/SpyTravel.cpp
-        game/src/Story.cpp
-        game/src/Vec2i.cpp
-        game/src/VisibilityStrategy.cpp)
+		game/src/Vec2i.cpp
+		)
 
 
 find_package(OpenGL REQUIRED)

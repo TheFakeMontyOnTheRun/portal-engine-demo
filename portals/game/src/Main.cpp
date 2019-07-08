@@ -24,7 +24,6 @@ long uclock()  {
 #include "Engine.h"
 #include "Renderer.h"
 #include "Graphics.h"
-#include "SpyTravel.h"
 
 bool isRunning = true;
 InitStateCallback initStateCallback = NULL;
@@ -39,7 +38,6 @@ NativeBitmap* currentBackgroundBitmap = NULL;
 uint8_t cursorPosition = 0;
 int32_t	nextNavigationSelection = -1;
 int32_t menuStateToReturn = -1;
-extern Spy playerSpy;
 int32_t currentGameMenuState = -1;
 
 void enterState(int32_t newState ) {
@@ -63,35 +61,7 @@ void enterState(int32_t newState ) {
     tickCallback = MainMenu_tickCallback;
     unloadStateCallback = MainMenu_unloadStateCallback;
     break;
-  case kPlayGame:
-    menuStateToReturn = kPlayGame;    
 
-  case kTravelPorto:
-  case kTravelLisbon:
-  case kTravelMadrid:
-  case kTravelBarcelona:
-  case kTravelSaarbrucken:
-  case kTravelFrankfurt:
-  case kTravelCharleroi:
-  case kTravelLuxembourg:
-    newState = kPlayGame;
-  case kStatusMenu:
-  case kTravelMenu:    
-  case kDossiersMenu:
-  case kReadDossier_Sofia:
-  case kReadDossier_Ricardo:
-  case kReadDossier_Juan:
-  case kReadDossier_Pau:
-  case kReadDossier_Lina:
-  case kReadDossier_Elias:
-  case kReadDossier_Carmen:
-  case kReadDossier_Jean:
-    initStateCallback = CarMenu_initStateCallback;
-    initialPaintCallback = CarMenu_initialPaintCallback;
-    repaintCallback = CarMenu_repaintCallback;
-    tickCallback = CarMenu_tickCallback;
-    unloadStateCallback = CarMenu_unloadStateCallback;    
-    break;
   case kPracticeCrawling:
     menuStateToReturn = kMainMenu;
     initStateCallback = Crawler_initStateCallback;
@@ -100,32 +70,10 @@ void enterState(int32_t newState ) {
     tickCallback = Crawler_tickCallback;
     unloadStateCallback = Crawler_unloadStateCallback;    
     break;
-  case kInvestigateMenu:
-    menuStateToReturn = kPlayGame;    
 
-    if (turnsToCatchBandit < 0 ) {
-      newState = kPlayGame;
-    } else if ( isBanditPresent() ) {
-      newState = kPlayGame;
-      getClue();
-    } else if (isSuspectPresent()) {
-      getClue();
-      newState = kReadDossier_Sofia + playerSpy.location;
-    } else {
-      menuStateToReturn = kMainMenu;
-      initStateCallback = Crawler_initStateCallback;
-      initialPaintCallback = Crawler_initialPaintCallback;
-      repaintCallback = Crawler_repaintCallback;
-      tickCallback = Crawler_tickCallback;
-      unloadStateCallback = Crawler_unloadStateCallback;    
-    }
-    break;   
   case kQuit:
     isRunning = false;
     break;
-  case kHelp:
-    break;
-
   }
 
   currentGameMenuState = newState;
