@@ -1,0 +1,31 @@
+CC=i586-pc-msdosdjgpp-gcc
+CXX=i586-pc-msdosdjgpp-g++
+CFLAGS=-Iinclude -std=c11 -g -c -O6 -Ofast -funroll-loops -funroll-all-loops -fomit-frame-pointer -fno-exceptions -ffast-math -mtune=i486 -march=i486 --pedantic
+CXXFLAGS=-Iinclude -g -c -O6 -Ofast -funroll-loops -funroll-all-loops -fomit-frame-pointer -fno-exceptions -ffast-math -mtune=i486 -march=i486 --pedantic
+LDFLAGS= -lemu -lm
+
+TARGET=game.exe
+
+OBJ=	src/Main.o \
+	src/Graphics.o \
+	src/RendererDOS.o  \
+	src/MainMenu.o \
+	src/FixP.o \
+	src/CarMenu.o \
+	src/Vec2i.o \
+	src/VisibilityStrategy.o \
+	src/3D.o \
+	src/SpyTravel.o \
+	src/Crawler.o \
+	src/Story.o \
+	src/LoadBitmap.o \
+	src/BASIC.o
+
+$(TARGET): $(OBJ)
+	$(CC) -o$(TARGET) $(OBJ) $(LIBS)
+
+all: $(TARGET)
+
+clean:
+	rm -f src/*.o
+	rm -f $(TARGET)	
