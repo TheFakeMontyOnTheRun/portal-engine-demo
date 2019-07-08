@@ -250,24 +250,17 @@ int32_t Crawler_initStateCallback(int32_t tag, void *data) {
 
 	numRooms = 7;
 	rooms = (Room *) malloc(sizeof(Room) * numRooms);
-	Room room0{Vec2i{-128, -128}, Vec2i{127, 127}, tableTexture,
-			   {0, 0, 0, 0, 0, 0}, -128, 128};
+	Room room0{Vec2i{-128, -128}, Vec2i{127, 127}, tableTexture,  {0, 0, 0, 0, 0, 0}, -128, 128};
+	Room room1{Vec2i{-2, 14}, Vec2i{3, 9}, tableTexture, {2, 0, 4, 0, 0, 3}, -1, 1};
+	Room room2{Vec2i{-2, 15}, Vec2i{3, 14}, noClueTexture, {0, 0, 1, 0, 0, 0}, -1, 1};
+	Room room3{Vec2i{-2, 14}, Vec2i{3, 9}, noClueTexture, {0, 0, 0, 0, 1, 0}, 2, 1};
+	Room room4{Vec2i{-2, 9}, Vec2i{3, 4}, clueTexture, {1, 0, 0, 0, 0, 0}, -1, 1};
+
+
+	Room room5{Vec2i{-4, 16}, Vec2i{-2, 15}, clueTexture, {0, 0, 0, 0, 0, 0}, -1, 1};
+	Room room6{Vec2i{-2, 14}, Vec2i{3, 9}, tableTexture, {0, 0, 0, 0, 0, 0}, 1, 3};
+
 	memcpy(&rooms[0], &room0, sizeof(Room));
-
-
-	Room room1{Vec2i{-2, 14}, Vec2i{3, 9}, tableTexture, {2, 0, 0, 0, 0, 0}, -1,
-			   1};
-	Room room2{Vec2i{-2, 15}, Vec2i{3, 14}, noClueTexture, {3, 4, 1, 0, 0, 0},
-			   -1, 1};
-	Room room3{Vec2i{-2, 16}, Vec2i{3, 15}, tableTexture, {0, 0, 2, 5, 0, 0},
-			   -1, 1};
-	Room room4{Vec2i{3, 15}, Vec2i{4, 14}, clueTexture, {0, 0, 0, 2, 0, 0}, -1,
-			   1};
-	Room room5{Vec2i{-4, 16}, Vec2i{-2, 15}, clueTexture, {0, 3, 0, 0, 0, 0},
-			   -1, 1};
-	Room room6{Vec2i{-2, 14}, Vec2i{3, 9}, tableTexture, {0, 0, 6, 0, 1, 0}, 1,
-			   3};
-
 	memcpy(&rooms[1], &room1, sizeof(Room));
 	memcpy(&rooms[2], &room2, sizeof(Room));
 	memcpy(&rooms[3], &room3, sizeof(Room));
@@ -381,12 +374,12 @@ drawRoomAt(const P3D &camera, const Vec2i &v0, const Vec2i &v1, int h0, int h1,
 
 
 	if (drawFacesFlags & kDrawFaceFront) {
-		/*
+
 		graphicsDrawSprite( p2->x, p2->y,
 				p3->x, p3->y,
 				texture->regular,
 				false, _dx, _dy);
-		*/
+
 	}
 
 }
@@ -519,7 +512,7 @@ void setClippingRectForLink(int roomNumber, int link, const P3D &camera) {
 			break;
 	}
 
-	graphicsEncloseClipRect(cx0, cy0, cx1, cy1);
+//	graphicsEncloseClipRect(cx0, cy0, cx1, cy1);
 }
 
 void renderRooms(int roomNumber, int fromLink, const P3D &camera) {
@@ -547,13 +540,15 @@ void renderRooms(int roomNumber, int fromLink, const P3D &camera) {
 
 	if (clippingRect.x0 == clippingRect.x1 ||
 		clippingRect.y0 == clippingRect.y1) {
-		puts("null portal");
+//		puts("null portal");
 		return;
 	}
 
 	auto clipRect = graphicsGetCurrentClipRect();
+
 	if (roomNumber == playerRoom) {
 		flags = flags & ~kDrawFaceFront;
+		flags = flags & ~kDrawFaceBack;
 	}
 
 	drawRoomAt(camera,
@@ -561,7 +556,8 @@ void renderRooms(int roomNumber, int fromLink, const P3D &camera) {
 			   room->p1,
 			   room->height0,
 			   room->height1,
-			   flags, room->texture);
+			   flags,
+			   room->texture);
 
 
 //  graphicsFill( 256 + (  2* room->p0.x ),
@@ -573,7 +569,7 @@ void renderRooms(int roomNumber, int fromLink, const P3D &camera) {
 
 	for (int link = 0; link < 6; ++link) {
 
-		if (link == 0) {
+		if (link == fromLink) {
 			continue;
 		}
 
@@ -603,7 +599,7 @@ void Crawler_repaintCallback(void) {
 
 
 void updatePlayerSector() {
-
+	return;
 	auto x = static_cast<int>(camera.x);
 	auto y = static_cast<int>(camera.y);
 	auto z = static_cast<int>(camera.z);
