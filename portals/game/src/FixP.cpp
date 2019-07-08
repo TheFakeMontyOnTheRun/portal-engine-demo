@@ -79,7 +79,11 @@ FixP max(const FixP &v1, const FixP &v2) {
 
 FixP abs(const FixP v1) {
 	FixP toReturn;
-	toReturn.val = std::abs(v1.val);
+	toReturn.val = v1.val;
+
+	if (toReturn.val < 0 ) {
+	    toReturn.val = -toReturn.val;
+	}
 
 	return toReturn;
 }
