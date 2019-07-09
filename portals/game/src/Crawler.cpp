@@ -114,7 +114,8 @@ drawRoomAt(const P3D &camera, const Vec2i &v0, const Vec2i &v1, int h0, int h1,
 
     const FixP _dx = FixP{v1.x - v0.x};
     const FixP _dy = FixP{h1 - h0};
-    FixP cameraToFarEnd = (abs((FixP{v0.y} - (camera.z))));
+
+    FixP cameraToFarEnd = std::abs(FixP{std::min(v1.y, v0.y)} - (camera.z + FixP{4}));
     FixP sectorLength = FixP{abs(v1.y - v0.y)};
     const FixP _dz = min(sectorLength, cameraToFarEnd);
 
