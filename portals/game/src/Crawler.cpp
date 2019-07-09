@@ -275,7 +275,6 @@ int32_t Crawler_initStateCallback(int32_t tag, void *data) {
 }
 
 void Crawler_initialPaintCallback(void) {
-	graphicsFill(256, 0, 64, 128, 0);
 }
 
 void
@@ -388,7 +387,7 @@ drawRoomAt(const P3D &camera, const Vec2i &v0, const Vec2i &v1, int h0, int h1,
 void setClippingRectForLink(int roomNumber, int link, const P3D &camera) {
 
 	if (roomNumber == playerRoom) {
-		graphicsSetClipRect(0, 0, 256, 128);
+		graphicsSetClipRect(0, 0, 256, 200);
 		return;
 	}
 
@@ -593,7 +592,7 @@ void renderRooms(int roomNumber, int fromLink, const P3D &camera) {
 void Crawler_repaintCallback(void) {
 	++crawlerFrame;
 	graphicsFill(0, 0, 320, 200, 255);
-	graphicsSetClipRect(0, 0, 256, 128);
+	graphicsSetClipRect(0, 0, 256, 200);
 	renderRooms(playerRoom, 2, camera);
 	graphicsSetClipRect(0, 0, 320, 200);
 }
