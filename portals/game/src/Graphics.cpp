@@ -627,3 +627,24 @@ graphicsFill(int16_t x, int16_t y, uint16_t dx, uint16_t dy, uint8_t pixel) {
 		memset(destinationLineStart, pixel, dx);
 	}
 }
+
+
+void
+graphicsDrawRect(int16_t x, int16_t y, uint16_t dx, uint16_t dy, uint8_t pixel) {
+
+    if (pixel == transparency) {
+        return;
+    }
+
+    uint8_t *destination = &buffer[0];
+
+    memset(destination + (320 * (y)) + x, pixel, dx);
+
+    for (int16_t py = 0; py < dy; ++py) {
+        *(destination + (320 * (y + py)) + x) = pixel;
+        *(destination + (320 * (y + py)) + x + dx) = pixel;
+    }
+
+    memset(destination + (320 * (y + dy)) + x, pixel, dx);
+
+}

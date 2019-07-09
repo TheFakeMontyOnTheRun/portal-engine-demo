@@ -22,6 +22,7 @@ void MainMenu_unloadStateCallback();
 int32_t Crawler_initStateCallback(int32_t tag, void* data);
 void Crawler_initialPaintCallback(void);
 void Crawler_repaintCallback(void);
+void graphicsDrawRect(int16_t x, int16_t y, uint16_t dx, uint16_t dy, uint8_t pixel);
 int32_t Crawler_tickCallback(int32_t tag, void* data);
 void Crawler_unloadStateCallback();
 
