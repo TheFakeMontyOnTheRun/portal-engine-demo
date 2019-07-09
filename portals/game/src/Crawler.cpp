@@ -455,7 +455,7 @@ void updatePlayerSector() {
         Room *room = &rooms[c];
 
         if (room->p0.x < x && x < room->p1.x &&
-            room->p0.y < z && z < room->p1.y &&
+            room->p1.y < z && z < room->p0.y && //yes, it's reversed. I'm weird.
             room->height0 < y && y < room->height1
                 ) {
 
