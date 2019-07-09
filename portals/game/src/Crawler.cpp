@@ -251,13 +251,14 @@ int32_t Crawler_initStateCallback(int32_t tag, void *data) {
 	numRooms = 7;
 	rooms = (Room *) malloc(sizeof(Room) * numRooms);
 	Room room0{Vec2i{-128, -128}, Vec2i{127, 127}, tableTexture,  {0, 0, 0, 0, 0, 0}, -128, 128};
-	Room room1{Vec2i{-2, 14}, Vec2i{3, 9}, tableTexture, {2, 0, 4, 0, 0, 3}, -1, 1};
-	Room room2{Vec2i{-2, 15}, Vec2i{3, 14}, noClueTexture, {0, 0, 1, 0, 0, 0}, -1, 1};
-	Room room3{Vec2i{-2, 14}, Vec2i{3, 9}, noClueTexture, {0, 0, 0, 0, 1, 0}, 2, 1};
-	Room room4{Vec2i{-2, 9}, Vec2i{3, 4}, clueTexture, {1, 0, 0, 0, 0, 0}, -1, 1};
+	Room room1{Vec2i{-2, 14}, Vec2i{3, 9}, noClueTexture, {2, 0, 0, 0, 0, 3}, -1, 1};
+	Room room2{Vec2i{-2, 20}, Vec2i{3, 14}, clueTexture, {0, 0, 1, 0, 0, 0}, -1, 1};
+	Room room3{Vec2i{-2, 14}, Vec2i{3, 9}, tableTexture, {0, 0, 0, 0, 1, 0}, 5, 1};
+
+	Room room4{Vec2i{-2, 9}, Vec2i{3, 4}, floorTexture, {1, 0, 0, 0, 0, 0}, -1, 1};
 
 
-	Room room5{Vec2i{-4, 16}, Vec2i{-2, 15}, clueTexture, {0, 0, 0, 0, 0, 0}, -1, 1};
+	Room room5{Vec2i{-4, 16}, Vec2i{-2, 15}, wallTexture, {0, 0, 0, 0, 0, 0}, -1, 1};
 	Room room6{Vec2i{-2, 14}, Vec2i{3, 9}, tableTexture, {0, 0, 0, 0, 0, 0}, 1, 3};
 
 	memcpy(&rooms[0], &room0, sizeof(Room));
