@@ -71,19 +71,19 @@ int32_t Crawler_initStateCallback(int32_t tag, void *data) {
     Room room1{Vec2i{-2, 14}, Vec2i{3, 9}, noClueTexture, {2, 0, 0, 0, 0, 3}, -1, 1};
 
     //2
-    Room room2{Vec2i{-2, 20}, Vec2i{3, 14}, clueTexture, {0, 4, 1, 0, 0, 0}, -1, 1};
+    Room room2{Vec2i{-2, 20}, Vec2i{3, 14}, clueTexture, {0, 4, 1, 6, 5, 0}, -1, 1};
 
     //3
-    Room room3{Vec2i{-2, 14}, Vec2i{3, 9}, tableTexture, {0, 0, 0, 0, 1, 0}, 5, 1};
+    Room room3{Vec2i{-2, 14}, Vec2i{3, 9}, tableTexture, {0, 0, 0, 0, 1, 0}, 1, 5};
 
     //4
     Room room4{Vec2i{3, 20}, Vec2i{6, 14}, tableTexture, {0, 0, 0, 2, 0, 0}, -1, 1};
 
     //5
-    Room room5{Vec2i{-4, 16}, Vec2i{-2, 15}, wallTexture, {0, 0, 0, 0, 0, 0}, -1, 1};
+    Room room5{Vec2i{-2, 20}, Vec2i{3, 14}, tableTexture, {0, 0, 0, 0, 0, 2}, -2, -1};
 
     //6
-    Room room6{Vec2i{-2, 14}, Vec2i{3, 9}, tableTexture, {0, 0, 0, 0, 0, 0}, 1, 3};
+    Room room6{Vec2i{-5, 20}, Vec2i{-2, 14}, tableTexture, {0, 2, 0, 0, 0, 0}, -1, 1};
 
     memcpy(&rooms[0], &room0, sizeof(Room));
     memcpy(&rooms[1], &room1, sizeof(Room));
@@ -327,8 +327,22 @@ void setClippingRectForLink(int roomNumber, int fromDirection, const P3D &camera
 
             cx1 = std::min<int>(256, std::max(static_cast<int16_t>(p3->x),
                                               static_cast<int16_t>(p4->x)));
-            cy1 = std::min<int>(200, std::min(static_cast<int16_t>(p3->y),
+            cy1 = std::min<int>(200, std::max(static_cast<int16_t>(p3->y),
                                               static_cast<int16_t>(p4->y)));
+        }
+            break;
+
+        case 4: {
+
+            cx0 = std::max<int>(0, std::min(static_cast<int16_t>(p1->x),
+                                            static_cast<int16_t>(p2->x))); //
+            cy0 = std::min<int>(0, std::min(static_cast<int16_t>(p1->y),
+                                            static_cast<int16_t>(p2->y))); //
+            cx1 = std::min<int>(256, std::max(static_cast<int16_t>(p3->x),
+                                              static_cast<int16_t>(p4->x))); //
+            cy1 = std::max<int>(200, std::max(static_cast<int16_t>(p1->y),
+                                              static_cast<int16_t>(p2->y))); //
+
         }
             break;
 
@@ -342,20 +356,6 @@ void setClippingRectForLink(int roomNumber, int fromDirection, const P3D &camera
                                               static_cast<int16_t>(p4->x))); //
             cy1 = std::max<int>(200, std::max(static_cast<int16_t>(p3->y),
                                               static_cast<int16_t>(p4->y))); //
-
-        }
-            break;
-
-        case 4: {
-
-            cx0 = std::max<int>(0, std::min(static_cast<int16_t>(p2->x),
-                                            static_cast<int16_t>(p3->x))); //
-            cy0 = std::min<int>(0, std::min(static_cast<int16_t>(p1->y),
-                                            static_cast<int16_t>(p2->y))); //
-            cx1 = std::min<int>(256, std::max(static_cast<int16_t>(p2->x),
-                                              static_cast<int16_t>(p3->x))); //
-            cy1 = std::max<int>(200, std::max(static_cast<int16_t>(p1->y),
-                                              static_cast<int16_t>(p2->y))); //
 
         }
             break;
