@@ -436,7 +436,7 @@ void Crawler_repaintCallback(void) {
 
 
 void updatePlayerSector() {
-    return;
+
     auto x = static_cast<int>(camera.x);
     auto y = static_cast<int>(camera.y);
     auto z = static_cast<int>(camera.z);
