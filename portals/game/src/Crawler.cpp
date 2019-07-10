@@ -395,21 +395,8 @@ void renderRooms(int roomNumber, int fromLink, const P3D &camera) {
 
     auto clipRect = graphicsGetCurrentClipRect();
 
-    flags = flags & ~kDrawFaceBack;
-
-    drawRoomAt(camera,
-               room->p0,
-               room->p1,
-               room->height0,
-               room->height1,
-               flags,
-               room->texture);
 
     for (int link = 0; link < 6; ++link) {
-
-        if (link == fromLink) {
-            continue;
-        }
 
         auto roomLinked = room->link[link];
 
@@ -424,6 +411,16 @@ void renderRooms(int roomNumber, int fromLink, const P3D &camera) {
 
         }
     }
+
+    flags = flags & ~kDrawFaceBack;
+
+    drawRoomAt(camera,
+               room->p0,
+               room->p1,
+               room->height0,
+               room->height1,
+               flags,
+               room->texture);
 }
 
 void Crawler_repaintCallback(void) {
@@ -454,9 +451,9 @@ void updatePlayerSector() {
     for (int c = 1; c < numRooms; ++c) {
         Room *room = &rooms[c];
 
-        if (room->p0.x < x && x < room->p1.x &&
-            room->p1.y < z && z < room->p0.y && //yes, it's reversed. I'm weird.
-            room->height0 < y && y < room->height1
+        if (room->p0.x < x && x <= room->p1.x &&
+            room->p1.y < z && z <= room->p0.y && //yes, it's reversed. I'm weird.
+            room->height0 < y && y <= room->height1
                 ) {
 
             if (playerRoom != c) {
