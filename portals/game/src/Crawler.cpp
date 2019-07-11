@@ -18,6 +18,11 @@
 #include "Graphics.h"
 #include "Vec2i.h"
 
+struct Projectile {
+    P3D position{ FixP{0}, FixP{0}, FixP{100}};
+    P3D speed;
+};
+
 struct Room {
     Vec2i p0;
     Vec2i p1;
@@ -37,8 +42,16 @@ Texture *noClueTexture = NULL;
 Texture *floorTexture = NULL;
 Texture *ceilingTexture = NULL;
 Texture *targetTexture = NULL;
+Texture *playerSprite = NULL;
+Texture *projectileSprite = NULL;
 
 P3D camera{FixP{-1}, FixP{0}, FixP{-15}};
+
+P3D playerPosition{FixP{0}, FixP{0}, FixP{15}};
+
+
+Projectile projectile;
+
 Room *rooms;
 int numRooms = 7;
 int playerRoom = 1;
@@ -62,6 +75,8 @@ int32_t Crawler_initStateCallback(int32_t tag, void *data) {
     doorClosedTexture = makeTextureFrom(loadBitmap("res/doorc.img"));
     clueTexture = makeTextureFrom(loadBitmap("res/clue.img"));
     noClueTexture = makeTextureFrom(loadBitmap("res/noclue.img"));
+    playerSprite = makeTextureFrom(loadBitmap("res/player.img"));
+    projectileSprite = makeTextureFrom(loadBitmap("res/shot.img"));
 
     numRooms = 7;
     rooms = (Room *) malloc(sizeof(Room) * numRooms);
@@ -423,11 +438,48 @@ void renderRooms(int roomNumber, int fromLink, const P3D &camera) {
                room->texture);
 }
 
+void drawSpriteAt( const P3D& position, NativeBitmap* sprite) {
+    FixP one{1};
+    FixP half = one / FixP{1};
+
+
+    {
+        const FixP x0 = FixP{position.x} - half - camera.x;
+        const FixP y0 = FixP{position.y} - half - camera.y;
+        const FixP z0 = FixP{position.z} - half - camera.z - FixP{8};
+
+        const FixP x1 = FixP{position.x} + half - camera.x;
+        const FixP y1 = FixP{position.y} + half - camera.y;
+
+        toProject[0] = P3D{x0, y0, z0};
+        toProject[1] = P3D{x1, y1, z0};
+    }
+
+    projectPoints(2);
+
+    const auto p1 = &projected[0];
+    const auto p2 = &projected[1];
+
+
+    graphicsDrawSprite(p1->x, p1->y,
+                       p2->x, p2->y,
+                       sprite,
+                       true, one, one);
+
+}
+
 void Crawler_repaintCallback(void) {
     ++crawlerFrame;
     graphicsFill(0, 0, 320, 200, 255);
     graphicsSetClipRect(0, 0, 256, 200);
     renderRooms(playerRoom, 2, camera);
+
+    drawSpriteAt(projectile.position, projectileSprite->regular);
+
+    drawSpriteAt(playerPosition, playerSprite->regular);
+
+
+
     graphicsSetClipRect(0, 0, 320, 200);
 }
 
@@ -467,27 +519,45 @@ void updatePlayerSector() {
 
 int32_t Crawler_tickCallback(int32_t tag, void *data) {
 
+    projectile.position.x += projectile.speed.x;
+    projectile.position.y += projectile.speed.y;
+    projectile.position.z += projectile.speed.z;
+
     switch (tag) {
         case kCommandLeft:
-            camera.x -= FixP{1};
+            camera.x -= FixP{1} / FixP{3};
+            playerPosition.x -= FixP{1};
             break;
         case kCommandRight:
-            camera.x += FixP{1};
-            break;
-        case kCommandUp:
-            camera.z += FixP{1};
-            break;
-        case kCommandDown:
-            camera.z -= FixP{1};
+            camera.x += FixP{1} / FixP{3};
+            playerPosition.x += FixP{1};
             break;
         case kCommandBack:
             return menuStateToReturn;
         case kCommandFire2:
-            camera.y -= FixP{1};
+            camera.y -= FixP{1} / FixP{3};
+            playerPosition.y -= FixP{1};
             break;
+        case kCommandDown:
+            camera.y += FixP{1} / FixP{3};
+            playerPosition.y += FixP{1};
+            break;
+
+        case kCommandUp:
+            camera.y -= FixP{1} / FixP{3};
+            playerPosition.y -= FixP{1};
+            break;
+
         case kCommandFire1:
-            camera.y += FixP{1};
+            projectile.position.x = playerPosition.x + projectile.speed.x;
+            projectile.position.y = playerPosition.y + projectile.speed.y;
+            projectile.position.z = playerPosition.z + projectile.speed.z;
+            projectile.speed.z = FixP{1} / FixP{10};
+            projectile.speed.x = 0;
+            projectile.speed.y = 0;
             break;
+
+
         default:
             break;
     }
