@@ -39,6 +39,12 @@ struct Room {
     uint8_t lastRenderedFrame = 255;
 };
 
+struct Enemy {
+    P3D position{ FixP{0}, FixP{0}, FixP{100}};
+    int life = 50;
+
+};
+
 int32_t onArriving();
 
 int32_t onProceeding();
@@ -58,12 +64,15 @@ Texture *ceilingTexture = NULL;
 Texture *targetTexture = NULL;
 Texture *playerSprite = NULL;
 Texture *projectileSprite = NULL;
+Texture *enemySprite = NULL;
 
 P3D camera{FixP{-1}, FixP{0}, FixP{0}};
 
 P3D playerPosition{FixP{0}, FixP{0}, FixP{0}};
 
 std::vector<Projectile> projectiles;
+
+std::vector<Enemy> enemies;
 
 int fireCooldown = 0;
 Room *rooms;
@@ -97,6 +106,7 @@ int32_t Crawler_initStateCallback(int32_t tag, void *data) {
     noClueTexture = makeTextureFrom(loadBitmap("res/noclue.img"));
     playerSprite = makeTextureFrom(loadBitmap("res/player.img"));
     projectileSprite = makeTextureFrom(loadBitmap("res/shot.img"));
+    enemySprite = makeTextureFrom(loadBitmap("res/enemy.img"));
 
     numRooms = 7;
     rooms = (Room *) malloc(sizeof(Room) * numRooms);
@@ -495,9 +505,16 @@ void Crawler_repaintCallback(void) {
     renderRooms(playerRoom, 2, camera);
 
 
+    for ( const auto& enemy : enemies ) {
+        drawSpriteAt(enemy.position, enemySprite->regular);
+    }
+
+
     for ( const auto& projectile : projectiles ) {
         drawSpriteAt(projectile.position, projectileSprite->regular);
     }
+
+
 
 
     drawSpriteAt(playerPosition, playerSprite->regular);
@@ -647,6 +664,9 @@ int32_t onProceeding() {
 }
 
 void onInitRoom(int room) {
+    Enemy e;
+    e.position = P3D{FixP{0}, FixP{0}, FixP{20}};
+    enemies.push_back(e);
 }
 
 int32_t onArriving() {
