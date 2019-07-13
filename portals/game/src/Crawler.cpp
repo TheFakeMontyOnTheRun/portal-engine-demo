@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <string.h>
 #include <Renderer.h>
+#include <vector>
 
 #include "FixP.h"
 #include "3D.h"
@@ -49,9 +50,9 @@ P3D camera{FixP{-1}, FixP{0}, FixP{-15}};
 
 P3D playerPosition{FixP{0}, FixP{0}, FixP{15}};
 
+std::vector<Projectile> projectiles;
 
-Projectile projectile;
-
+int fireCooldown = 0;
 Room *rooms;
 int numRooms = 7;
 int playerRoom = 1;
@@ -474,13 +475,19 @@ void Crawler_repaintCallback(void) {
     graphicsSetClipRect(0, 0, 256, 200);
     renderRooms(playerRoom, 2, camera);
 
-    drawSpriteAt(projectile.position, projectileSprite->regular);
+
+    for ( const auto& projectile : projectiles ) {
+        drawSpriteAt(projectile.position, projectileSprite->regular);
+    }
+
 
     drawSpriteAt(playerPosition, playerSprite->regular);
 
 
 
     graphicsSetClipRect(0, 0, 320, 200);
+
+    graphicsFill(0, 192, fireCooldown >= 0 ? fireCooldown : 0, 8, 128 );
 }
 
 
@@ -519,9 +526,21 @@ void updatePlayerSector() {
 
 int32_t Crawler_tickCallback(int32_t tag, void *data) {
 
-    projectile.position.x += projectile.speed.x;
-    projectile.position.y += projectile.speed.y;
-    projectile.position.z += projectile.speed.z;
+    for ( auto& projectile : projectiles ) {
+        projectile.position.x += projectile.speed.x;
+        projectile.position.y += projectile.speed.y;
+        projectile.position.z += projectile.speed.z;
+    }
+
+    projectiles.erase(std::remove_if(std::begin(projectiles),
+                              std::end(projectiles),
+                              [](auto& projectile){
+                                    return (projectile.position.z > FixP{50}) || (projectile.position.z < FixP{8}) ;
+                                }),
+               std::end(projectiles)
+               );
+
+    fireCooldown--;
 
     switch (tag) {
         case kCommandLeft:
@@ -549,12 +568,18 @@ int32_t Crawler_tickCallback(int32_t tag, void *data) {
             break;
 
         case kCommandFire1:
-            projectile.position.x = playerPosition.x + projectile.speed.x;
-            projectile.position.y = playerPosition.y + projectile.speed.y;
-            projectile.position.z = playerPosition.z + projectile.speed.z;
-            projectile.speed.z = FixP{1} / FixP{10};
-            projectile.speed.x = 0;
-            projectile.speed.y = 0;
+
+            if (fireCooldown <= 0 ) {
+                Projectile projectile;
+                projectile.position.x = playerPosition.x + projectile.speed.x;
+                projectile.position.y = playerPosition.y + projectile.speed.y;
+                projectile.position.z = playerPosition.z + projectile.speed.z;
+                projectile.speed.z = FixP{1} / FixP{10};
+                projectile.speed.x = 0;
+                projectile.speed.y = 0;
+                projectiles.push_back(projectile);
+                fireCooldown = 16;
+            }
             break;
 
 
