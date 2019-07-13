@@ -19,6 +19,11 @@
 #include "Graphics.h"
 #include "Vec2i.h"
 
+
+enum GameState { Arriving, Battling, GameOver, Proceeding};
+
+GameState currentGameState = Arriving;
+
 struct Projectile {
     P3D position{ FixP{0}, FixP{0}, FixP{100}};
     P3D speed;
@@ -34,6 +39,14 @@ struct Room {
     uint8_t lastRenderedFrame = 255;
 };
 
+int32_t onArriving();
+
+int32_t onProceeding();
+
+int32_t onGameOver();
+
+void onInitRoom(int i);
+
 Texture *wallTexture = NULL;
 Texture *doorOpenTexture = NULL;
 Texture *doorClosedTexture = NULL;
@@ -46,9 +59,9 @@ Texture *targetTexture = NULL;
 Texture *playerSprite = NULL;
 Texture *projectileSprite = NULL;
 
-P3D camera{FixP{-1}, FixP{0}, FixP{-15}};
+P3D camera{FixP{-1}, FixP{0}, FixP{0}};
 
-P3D playerPosition{FixP{0}, FixP{0}, FixP{15}};
+P3D playerPosition{FixP{0}, FixP{0}, FixP{0}};
 
 std::vector<Projectile> projectiles;
 
@@ -56,6 +69,7 @@ int fireCooldown = 0;
 Room *rooms;
 int numRooms = 7;
 int playerRoom = 1;
+int room = 0;
 
 const uint8_t kDrawFaceFront = 0b00000001;
 const uint8_t kDrawFaceRight = 0b00000010;
@@ -66,7 +80,12 @@ const uint8_t kDrawFaceUp    = 0b00100000;
 
 uint8_t crawlerFrame = 0;
 
+
+
 int32_t Crawler_initStateCallback(int32_t tag, void *data) {
+    currentGameState = Arriving;
+    playerPosition.z = 0;
+    onInitRoom(room++);
     wallTexture = makeTextureFrom(loadBitmap("res/wall.img"));
     floorTexture = makeTextureFrom(loadBitmap("res/ceiling.img"));
     ceilingTexture = makeTextureFrom(loadBitmap("res/floor.img"));
@@ -524,7 +543,10 @@ void updatePlayerSector() {
     }
 }
 
-int32_t Crawler_tickCallback(int32_t tag, void *data) {
+
+int32_t onGamePlay(int32_t tag ) {
+
+
 
     for ( auto& projectile : projectiles ) {
         projectile.position.x += projectile.speed.x;
@@ -533,12 +555,12 @@ int32_t Crawler_tickCallback(int32_t tag, void *data) {
     }
 
     projectiles.erase(std::remove_if(std::begin(projectiles),
-                              std::end(projectiles),
-                              [](auto& projectile){
-                                    return (projectile.position.z > FixP{50}) || (projectile.position.z < FixP{8}) ;
-                                }),
-               std::end(projectiles)
-               );
+                                     std::end(projectiles),
+                                     [](auto& projectile){
+                                         return (projectile.position.z > FixP{50}) || (projectile.position.z < FixP{8}) ;
+                                     }),
+                      std::end(projectiles)
+    );
 
     fireCooldown--;
 
@@ -553,10 +575,6 @@ int32_t Crawler_tickCallback(int32_t tag, void *data) {
             break;
         case kCommandBack:
             return menuStateToReturn;
-        case kCommandFire2:
-            camera.y -= FixP{1} / FixP{3};
-            playerPosition.y -= FixP{1};
-            break;
         case kCommandDown:
             camera.y += FixP{1} / FixP{3};
             playerPosition.y += FixP{1};
@@ -565,6 +583,10 @@ int32_t Crawler_tickCallback(int32_t tag, void *data) {
         case kCommandUp:
             camera.y -= FixP{1} / FixP{3};
             playerPosition.y -= FixP{1};
+            break;
+
+        case kCommandFire2:
+            currentGameState = Proceeding;
             break;
 
         case kCommandFire1:
@@ -587,6 +609,52 @@ int32_t Crawler_tickCallback(int32_t tag, void *data) {
             break;
     }
     updatePlayerSector();
+
+    return -1;
+}
+
+
+
+int32_t Crawler_tickCallback(int32_t tag, void *data) {
+
+    switch( currentGameState) {
+        case Arriving:
+            return onArriving();
+        case Battling:
+            return onGamePlay(tag);
+        case GameOver:
+            return onGameOver();
+        case Proceeding:
+            return onProceeding();
+    }
+}
+
+int32_t onGameOver() {
+    return kMainMenu;
+}
+
+int32_t onProceeding() {
+
+    if (playerPosition.z < FixP{100}) {
+        playerPosition.z += FixP{1};
+    } else {
+        currentGameState = Arriving;
+        onInitRoom(room++);
+        playerPosition.z = FixP{0};
+    }
+
+    return -1;
+}
+
+void onInitRoom(int room) {
+}
+
+int32_t onArriving() {
+    if (playerPosition.z < FixP{15}) {
+        playerPosition.z += FixP{1};
+    } else {
+        currentGameState = Battling;
+    }
 
     return -1;
 }
