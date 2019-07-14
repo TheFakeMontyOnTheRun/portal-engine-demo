@@ -100,6 +100,7 @@ uint8_t crawlerFrame = 0;
 int32_t Crawler_initStateCallback(int32_t tag, void *data) {
     currentGameState = Arriving;
     playerPosition.z = 0;
+    room = 1;
     wallTexture = makeTextureFrom(loadBitmap("res/wall.img"));
     floorTexture = makeTextureFrom(loadBitmap("res/ceiling.img"));
     ceilingTexture = makeTextureFrom(loadBitmap("res/floor.img"));
@@ -677,6 +678,8 @@ int32_t onProceeding() {
 }
 
 void onInitRoom(int room) {
+    enemies.clear();
+    projectiles.clear();
 
     numRooms = 7;
     rooms = (Room *) malloc(sizeof(Room) * numRooms);
