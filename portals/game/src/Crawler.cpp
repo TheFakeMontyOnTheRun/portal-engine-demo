@@ -79,6 +79,7 @@ Texture *enemySprite = NULL;
 P3D camera{FixP{-1}, FixP{0}, FixP{0}};
 
 P3D playerPosition{FixP{0}, FixP{0}, FixP{0}};
+P3D playerAccel{FixP{0}, FixP{0}, FixP{0}};
 
 std::vector<Projectile> projectiles;
 
@@ -623,19 +624,19 @@ int32_t onGamePlay(int32_t tag ) {
 
     switch (tag) {
         case kCommandLeft:
-            playerPosition.x -= FixP{1};
+            playerAccel.x -= FixP{1};
             break;
         case kCommandRight:
-            playerPosition.x += FixP{1};
+            playerAccel.x += FixP{1};
             break;
         case kCommandBack:
             return menuStateToReturn;
         case kCommandDown:
-            playerPosition.y += FixP{1};
+            playerAccel.y += FixP{1};
             break;
 
         case kCommandUp:
-            playerPosition.y -= FixP{1};
+            playerAccel.y -= FixP{1};
             break;
 
         case kCommandFire2:
@@ -654,6 +655,14 @@ int32_t onGamePlay(int32_t tag ) {
         default:
             break;
     }
+
+    playerPosition.x += playerAccel.x;
+    playerPosition.y += playerAccel.y;
+    playerPosition.z += playerAccel.z;
+
+    playerAccel.x /= FixP{2};
+    playerAccel.y /= FixP{2};
+    playerAccel.z /= FixP{2};
 
     camera.z = playerPosition.z - FixP{10};
     camera.y =( (FixP{4} * playerPosition.y) / FixP{10});
