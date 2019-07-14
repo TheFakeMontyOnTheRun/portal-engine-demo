@@ -19,7 +19,7 @@
 #include "Graphics.h"
 #include "Vec2i.h"
 
-
+enum Team{Player, Aliens};
 enum GameState { Arriving, Battling, GameOver, Proceeding};
 
 GameState currentGameState = Arriving;
@@ -28,8 +28,9 @@ struct Projectile {
     P3D mPosition{ FixP{0}, FixP{0}, FixP{100}};
     P3D mSpeed;
     bool mActive = true;
+    Team mTeam;
 
-    Projectile( const P3D& initialPos, const P3D& speed ) : mPosition{initialPos}, mSpeed{speed} {
+    Projectile( const P3D& initialPos, const P3D& speed, Team team ) : mPosition{initialPos}, mSpeed{speed}, mTeam{team} {
     }
 };
 
@@ -70,6 +71,7 @@ Texture *ceilingTexture = NULL;
 Texture *targetTexture = NULL;
 Texture *playerSprite = NULL;
 Texture *projectileSprite = NULL;
+Texture *alienShotSprite = NULL;
 Texture *enemySprite = NULL;
 
 P3D camera{FixP{-1}, FixP{0}, FixP{0}};
@@ -110,6 +112,7 @@ int32_t Crawler_initStateCallback(int32_t tag, void *data) {
     noClueTexture = makeTextureFrom(loadBitmap("res/noclue.img"));
     playerSprite = makeTextureFrom(loadBitmap("res/player.img"));
     projectileSprite = makeTextureFrom(loadBitmap("res/shot.img"));
+    alienShotSprite = makeTextureFrom(loadBitmap("res/shot2.img"));
     enemySprite = makeTextureFrom(loadBitmap("res/enemy.img"));
     onInitRoom(room++);
 
@@ -485,7 +488,7 @@ void Crawler_repaintCallback(void) {
 
 
     for ( const auto& projectile : projectiles ) {
-        drawSpriteAt(projectile.mPosition, projectileSprite->regular);
+        drawSpriteAt(projectile.mPosition, projectile.mTeam == Player ? projectileSprite->regular : alienShotSprite->regular );
     }
 
 
@@ -543,6 +546,12 @@ int32_t onGamePlay(int32_t tag ) {
             enemy.mSpeed.x = FixP{(rand() % 32)} / FixP{1024} * ( (rand() % 2 ) ? FixP{-1} : FixP{1});
             enemy.mSpeed.y = FixP{(rand() % 32)} / FixP{1024} * ( (rand() % 2 ) ? FixP{-1} : FixP{1});
         }
+
+
+
+        if (rand() % 128 == 0 && projectiles.size() < 32 ) {
+            projectiles.emplace_back( enemy.mPosition, P3D{0, 0, FixP{-1} / FixP{10}}, Aliens );
+        }
     }
 
 
@@ -554,17 +563,32 @@ int32_t onGamePlay(int32_t tag ) {
 
         FixP half = FixP{1} / FixP{2};
 
-        for ( auto& enemy : enemies ) {
-            if (
-                    ((projectile.mPosition.x - half) <= enemy.mPosition.x && enemy.mPosition.x <= (projectile.mPosition.x + half) ) &&
-                    ((projectile.mPosition.y - half) <= enemy.mPosition.y && enemy.mPosition.y <= (projectile.mPosition.y + half) ) &&
-                    static_cast<int>(projectile.mPosition.z) == static_cast<int>(enemy.mPosition.z) &&
-                projectile.mActive) {
+        if (projectile.mTeam == Player ) {
+            for ( auto& enemy : enemies ) {
+                if (
+                        ((projectile.mPosition.x - half) <= enemy.mPosition.x && enemy.mPosition.x <= (projectile.mPosition.x + half) ) &&
+                        ((projectile.mPosition.y - half) <= enemy.mPosition.y && enemy.mPosition.y <= (projectile.mPosition.y + half) ) &&
+                        static_cast<int>(projectile.mPosition.z) == static_cast<int>(enemy.mPosition.z) &&
+                        projectile.mActive) {
 
-                enemy.mLife -= 20;
-                projectile.mActive = false;
+                    enemy.mLife -= 20;
+                    projectile.mActive = false;
+                }
             }
+        } else {
+            if (
+                    ((projectile.mPosition.x - half) <= playerPosition.x && playerPosition.x <= (projectile.mPosition.x + half) ) &&
+                    ((projectile.mPosition.y - half) <= playerPosition.y && playerPosition.y <= (projectile.mPosition.y + half) ) &&
+                    static_cast<int>(projectile.mPosition.z) == static_cast<int>(playerPosition.z) &&
+                    projectile.mActive) {
+
+                projectile.mActive = false;
+
+                return kMainMenu;
+            }
+
         }
+
     }
 
 
@@ -621,7 +645,7 @@ int32_t onGamePlay(int32_t tag ) {
         case kCommandFire1:
 
             if (fireCooldown <= 0 ) {
-                projectiles.emplace_back( playerPosition, P3D{0, 0, FixP{1} / FixP{10}} );
+                projectiles.emplace_back( playerPosition, P3D{0, 0, FixP{1} / FixP{10}}, Player );
                 fireCooldown = 16;
             }
             break;
@@ -633,9 +657,7 @@ int32_t onGamePlay(int32_t tag ) {
 
     camera.z = playerPosition.z - FixP{10};
     camera.y =( (FixP{4} * playerPosition.y) / FixP{10});
-    camera.x = (playerPosition.x  * FixP{1}) / FixP{4} ;
-
-    printf("(%f, %f, %f) - (%f, %f, %f)\n", asFloat(camera.x), asFloat(camera.y), asFloat(camera.z), asFloat(playerPosition.x), asFloat(playerPosition.y), asFloat(playerPosition.z));
+    camera.x = (playerPosition.x  * FixP{1}) / FixP{4};
 
     if ( updatePlayerSector(playerPosition) == 0 ) {
         playerPosition = positionBackup;
@@ -744,8 +766,6 @@ int32_t onArriving() {
 
 void Crawler_unloadStateCallback() {
     releaseTexture(wallTexture);
-    releaseTexture(doorOpenTexture);
-    releaseTexture(doorClosedTexture);
     releaseTexture(tableTexture);
     releaseTexture(clueTexture);
     releaseTexture(noClueTexture);
