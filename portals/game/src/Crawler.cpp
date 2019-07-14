@@ -588,6 +588,14 @@ int32_t onGamePlay(int32_t tag ) {
                       std::end(projectiles)
     );
 
+
+    if (enemies.size() == 0) {
+        if (projectiles.size() == 0) {
+            currentGameState = Proceeding;
+        }
+        return -1;
+    }
+
     fireCooldown--;
 
     P3D positionBackup{playerPosition};
