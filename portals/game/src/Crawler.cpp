@@ -27,6 +27,7 @@ GameState currentGameState = Arriving;
 struct Projectile {
     P3D mPosition{ FixP{0}, FixP{0}, FixP{100}};
     P3D mSpeed;
+    bool mActive = true;
 
     Projectile( const P3D& initialPos, const P3D& speed ) : mPosition{initialPos}, mSpeed{speed} {
     }
@@ -570,12 +571,32 @@ int32_t onGamePlay(int32_t tag ) {
         projectile.mPosition.x += projectile.mSpeed.x;
         projectile.mPosition.y += projectile.mSpeed.y;
         projectile.mPosition.z += projectile.mSpeed.z;
+
+        for ( auto& enemy : enemies ) {
+            if (projectile.mPosition.x == enemy.mPosition.x &&
+                projectile.mPosition.y == enemy.mPosition.y &&
+                static_cast<int>(projectile.mPosition.z) == static_cast<int>(enemy.mPosition.z) &&
+                projectile.mActive) {
+                enemy.mLife -= 20;
+                projectile.mActive = false;
+            }
+        }
     }
+
+
+        enemies.erase(std::remove_if(std::begin(enemies),
+                                     std::end(enemies),
+                                     [](auto &enemy) {
+                                         return enemy.mLife <= 0;
+                                     }),
+                      std::end(enemies)
+        );
+
 
     projectiles.erase(std::remove_if(std::begin(projectiles),
                                      std::end(projectiles),
                                      [](auto& projectile){
-                                         return updatePlayerSector(projectile.mPosition) == 0;//(projectile.mPosition.z > FixP{50}) || (projectile.mPosition.z < FixP{8}) ;
+                                         return !projectile.mActive || (updatePlayerSector(projectile.mPosition) == 0);
                                      }),
                       std::end(projectiles)
     );
@@ -665,7 +686,7 @@ int32_t onProceeding() {
 }
 
 void onInitRoom(int room) {
-        enemies.emplace_back(P3D{FixP{0}, FixP{0}, FixP{20}});
+    enemies.emplace_back(P3D{FixP{0}, FixP{0}, FixP{15}});
 }
 
 int32_t onArriving() {
