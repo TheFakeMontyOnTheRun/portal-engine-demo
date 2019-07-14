@@ -25,8 +25,11 @@ enum GameState { Arriving, Battling, GameOver, Proceeding};
 GameState currentGameState = Arriving;
 
 struct Projectile {
-    P3D position{ FixP{0}, FixP{0}, FixP{100}};
-    P3D speed;
+    P3D mPosition{ FixP{0}, FixP{0}, FixP{100}};
+    P3D mSpeed;
+
+    Projectile( const P3D& initialPos, const P3D& speed ) : mPosition{initialPos}, mSpeed{speed} {
+    }
 };
 
 struct Room {
@@ -40,9 +43,12 @@ struct Room {
 };
 
 struct Enemy {
-    P3D position{ FixP{0}, FixP{0}, FixP{100}};
-    int life = 50;
+    P3D mPosition{ FixP{0}, FixP{0}, FixP{100}};
+    int mLife = 50;
 
+    Enemy( const P3D& pos ) : mPosition(pos) {
+
+    }
 };
 
 int32_t onArriving();
@@ -506,12 +512,12 @@ void Crawler_repaintCallback(void) {
 
 
     for ( const auto& enemy : enemies ) {
-        drawSpriteAt(enemy.position, enemySprite->regular);
+        drawSpriteAt(enemy.mPosition, enemySprite->regular);
     }
 
 
     for ( const auto& projectile : projectiles ) {
-        drawSpriteAt(projectile.position, projectileSprite->regular);
+        drawSpriteAt(projectile.mPosition, projectileSprite->regular);
     }
 
 
@@ -566,15 +572,15 @@ int32_t onGamePlay(int32_t tag ) {
 
 
     for ( auto& projectile : projectiles ) {
-        projectile.position.x += projectile.speed.x;
-        projectile.position.y += projectile.speed.y;
-        projectile.position.z += projectile.speed.z;
+        projectile.mPosition.x += projectile.mSpeed.x;
+        projectile.mPosition.y += projectile.mSpeed.y;
+        projectile.mPosition.z += projectile.mSpeed.z;
     }
 
     projectiles.erase(std::remove_if(std::begin(projectiles),
                                      std::end(projectiles),
                                      [](auto& projectile){
-                                         return (projectile.position.z > FixP{50}) || (projectile.position.z < FixP{8}) ;
+                                         return updatePlayerSector(projectile.mPosition) == 0;//(projectile.mPosition.z > FixP{50}) || (projectile.mPosition.z < FixP{8}) ;
                                      }),
                       std::end(projectiles)
     );
@@ -609,14 +615,7 @@ int32_t onGamePlay(int32_t tag ) {
         case kCommandFire1:
 
             if (fireCooldown <= 0 ) {
-                Projectile projectile;
-                projectile.position.x = playerPosition.x + projectile.speed.x;
-                projectile.position.y = playerPosition.y + projectile.speed.y;
-                projectile.position.z = playerPosition.z + projectile.speed.z;
-                projectile.speed.z = FixP{1} / FixP{10};
-                projectile.speed.x = 0;
-                projectile.speed.y = 0;
-                projectiles.push_back(projectile);
+                projectiles.emplace_back( playerPosition, P3D{0, 0, FixP{1} / FixP{10}} );
                 fireCooldown = 16;
             }
             break;
@@ -664,9 +663,7 @@ int32_t onProceeding() {
 }
 
 void onInitRoom(int room) {
-    Enemy e;
-    e.position = P3D{FixP{0}, FixP{0}, FixP{20}};
-    enemies.push_back(e);
+        enemies.emplace_back(P3D{FixP{0}, FixP{0}, FixP{20}});
 }
 
 int32_t onArriving() {
