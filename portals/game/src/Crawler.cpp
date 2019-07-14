@@ -102,7 +102,6 @@ uint8_t crawlerFrame = 0;
 int32_t Crawler_initStateCallback(int32_t tag, void *data) {
     currentGameState = Arriving;
     playerPosition.z = 0;
-    onInitRoom(room++);
     wallTexture = makeTextureFrom(loadBitmap("res/wall.img"));
     floorTexture = makeTextureFrom(loadBitmap("res/ceiling.img"));
     ceilingTexture = makeTextureFrom(loadBitmap("res/floor.img"));
@@ -115,6 +114,7 @@ int32_t Crawler_initStateCallback(int32_t tag, void *data) {
     playerSprite = makeTextureFrom(loadBitmap("res/player.img"));
     projectileSprite = makeTextureFrom(loadBitmap("res/shot.img"));
     enemySprite = makeTextureFrom(loadBitmap("res/enemy.img"));
+    onInitRoom(room++);
 
     return 0;
 }
