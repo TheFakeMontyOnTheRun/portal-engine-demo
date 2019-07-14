@@ -29,6 +29,7 @@ struct Projectile {
     P3D mSpeed;
     bool mActive = true;
     Team mTeam;
+    int mSector = 0;
 
     Projectile( const P3D& initialPos, const P3D& speed, Team team ) : mPosition{initialPos}, mSpeed{speed}, mTeam{team} {
     }
@@ -48,6 +49,7 @@ struct Enemy {
     P3D mPosition{ FixP{0}, FixP{0}, FixP{100}};
     P3D mSpeed;
     int mLife = 50;
+    int mSector = 0;
 
     Enemy( const P3D& pos, const P3D& speed ) : mPosition(pos), mSpeed(speed) {
 
@@ -387,6 +389,36 @@ void setClippingRectForLink(int roomNumber, int fromDirection, const P3D &camera
     graphicsEncloseClipRect(cx0, cy0, cx1, cy1);
 }
 
+void drawSpriteAt( const P3D& position, NativeBitmap* sprite) {
+    FixP one{1};
+    FixP half = one / FixP{1};
+
+
+    {
+        const FixP x0 = FixP{position.x} - half - camera.x;
+        const FixP y0 = FixP{position.y} - half - camera.y;
+        const FixP z0 = FixP{position.z} - half - camera.z;
+
+        const FixP x1 = FixP{position.x} + half - camera.x;
+        const FixP y1 = FixP{position.y} + half - camera.y;
+
+        toProject[0] = P3D{x0, y0, z0};
+        toProject[1] = P3D{x1, y1, z0};
+    }
+
+    projectPoints(2);
+
+    const auto p1 = &projected[0];
+    const auto p2 = &projected[1];
+
+
+    graphicsDrawSprite(p1->x, p1->y,
+                       p2->x, p2->y,
+                       sprite,
+                       true, one, one);
+
+}
+
 void renderRooms(int roomNumber, int fromLink, const P3D &camera) {
 
     Room *room = &rooms[roomNumber];
@@ -443,36 +475,18 @@ void renderRooms(int roomNumber, int fromLink, const P3D &camera) {
                room->height1,
                flags,
                room->texture);
-}
 
-void drawSpriteAt( const P3D& position, NativeBitmap* sprite) {
-    FixP one{1};
-    FixP half = one / FixP{1};
-
-
-    {
-        const FixP x0 = FixP{position.x} - half - camera.x;
-        const FixP y0 = FixP{position.y} - half - camera.y;
-        const FixP z0 = FixP{position.z} - half - camera.z;
-
-        const FixP x1 = FixP{position.x} + half - camera.x;
-        const FixP y1 = FixP{position.y} + half - camera.y;
-
-        toProject[0] = P3D{x0, y0, z0};
-        toProject[1] = P3D{x1, y1, z0};
+    for (auto& enemy : enemies ) {
+        if ( enemy.mSector == roomNumber ) {
+            drawSpriteAt(enemy.mPosition, enemySprite->regular);
+        }
     }
 
-    projectPoints(2);
-
-    const auto p1 = &projected[0];
-    const auto p2 = &projected[1];
-
-
-    graphicsDrawSprite(p1->x, p1->y,
-                       p2->x, p2->y,
-                       sprite,
-                       true, one, one);
-
+    for ( const auto& projectile : projectiles ) {
+        if (projectile.mSector == roomNumber ) {
+            drawSpriteAt(projectile.mPosition, projectile.mTeam == Player ? projectileSprite->regular : alienShotSprite->regular );
+        }
+    }
 }
 
 void Crawler_repaintCallback(void) {
@@ -481,23 +495,8 @@ void Crawler_repaintCallback(void) {
     graphicsSetClipRect(0, 0, 256, 200);
     renderRooms(playerRoom, 2, camera);
 
-
-    for ( const auto& enemy : enemies ) {
-        drawSpriteAt(enemy.mPosition, enemySprite->regular);
-    }
-
-
-    for ( const auto& projectile : projectiles ) {
-        drawSpriteAt(projectile.mPosition, projectile.mTeam == Player ? projectileSprite->regular : alienShotSprite->regular );
-    }
-
-
-
-
     drawSpriteAt(playerPosition, playerSprite->regular);
-
-
-
+    
     graphicsSetClipRect(0, 0, 320, 200);
 
     graphicsFill(0, 192, fireCooldown >= 0 ? fireCooldown : 0, 8, 128 );
@@ -538,8 +537,9 @@ int32_t onGamePlay(int32_t tag ) {
     for (auto& enemy : enemies ) {
         enemy.mPosition.x += enemy.mSpeed.x;
         enemy.mPosition.y += enemy.mSpeed.y;
+        enemy.mSector = updatePlayerSector(enemy.mPosition);
         
-        if ( updatePlayerSector(enemy.mPosition) == 0 ) {
+        if ( enemy.mSector == 0 ) {
             enemy.mPosition.x -= enemy.mSpeed.x;
             enemy.mPosition.y -= enemy.mSpeed.y;
 
@@ -560,7 +560,7 @@ int32_t onGamePlay(int32_t tag ) {
         projectile.mPosition.x += projectile.mSpeed.x;
         projectile.mPosition.y += projectile.mSpeed.y;
         projectile.mPosition.z += projectile.mSpeed.z;
-
+        projectile.mSector = updatePlayerSector(projectile.mPosition);
         FixP half = FixP{1} / FixP{2};
 
         if (projectile.mTeam == Player ) {
@@ -604,7 +604,7 @@ int32_t onGamePlay(int32_t tag ) {
     projectiles.erase(std::remove_if(std::begin(projectiles),
                                      std::end(projectiles),
                                      [](auto& projectile){
-                                         return !projectile.mActive || (updatePlayerSector(projectile.mPosition) == 0);
+                                         return !projectile.mActive || ( projectile.mSector == 0);
                                      }),
                       std::end(projectiles)
     );
