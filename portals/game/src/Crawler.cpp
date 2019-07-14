@@ -45,9 +45,10 @@ struct Room {
 
 struct Enemy {
     P3D mPosition{ FixP{0}, FixP{0}, FixP{100}};
+    P3D mSpeed;
     int mLife = 50;
 
-    Enemy( const P3D& pos ) : mPosition(pos) {
+    Enemy( const P3D& pos, const P3D& speed ) : mPosition(pos), mSpeed(speed) {
 
     }
 };
@@ -85,7 +86,7 @@ int fireCooldown = 0;
 Room *rooms;
 int numRooms = 7;
 int playerRoom = 1;
-int room = 0;
+int room = 1;
 
 const uint8_t kDrawFaceFront = 0b00000001;
 const uint8_t kDrawFaceRight = 0b00000010;
@@ -114,37 +115,6 @@ int32_t Crawler_initStateCallback(int32_t tag, void *data) {
     playerSprite = makeTextureFrom(loadBitmap("res/player.img"));
     projectileSprite = makeTextureFrom(loadBitmap("res/shot.img"));
     enemySprite = makeTextureFrom(loadBitmap("res/enemy.img"));
-
-    numRooms = 7;
-    rooms = (Room *) malloc(sizeof(Room) * numRooms);
-    Room room0{Vec2i{-128, -128}, Vec2i{127, 127}, tableTexture, {0, 0, 0, 0, 0, 0}, -128, 128};
-
-    //1
-    Room room1{Vec2i{-2, 14}, Vec2i{3, 9}, noClueTexture, {2, 0, 0, 0, 0, 3}, -1, 1};
-
-    //2
-    Room room2{Vec2i{-2, 20}, Vec2i{3, 14}, clueTexture, {0, 4, 1, 6, 5, 0}, -1, 1};
-
-    //3
-    Room room3{Vec2i{-2, 14}, Vec2i{3, 9}, tableTexture, {0, 0, 0, 0, 1, 0}, 1, 5};
-
-    //4
-    Room room4{Vec2i{3, 20}, Vec2i{6, 14}, tableTexture, {0, 0, 0, 2, 0, 0}, -1, 1};
-
-    //5
-    Room room5{Vec2i{-2, 20}, Vec2i{3, 14}, tableTexture, {0, 0, 0, 0, 0, 2}, -2, -1};
-
-    //6
-    Room room6{Vec2i{-5, 20}, Vec2i{-2, 14}, tableTexture, {0, 2, 0, 0, 0, 0}, -1, 1};
-
-    memcpy(&rooms[0], &room0, sizeof(Room));
-    memcpy(&rooms[1], &room1, sizeof(Room));
-    memcpy(&rooms[2], &room2, sizeof(Room));
-    memcpy(&rooms[3], &room3, sizeof(Room));
-    memcpy(&rooms[4], &room4, sizeof(Room));
-    memcpy(&rooms[5], &room5, sizeof(Room));
-    memcpy(&rooms[6], &room6, sizeof(Room));
-
 
     return 0;
 }
@@ -565,6 +535,19 @@ int updatePlayerSector( const P3D& pos ) {
 
 int32_t onGamePlay(int32_t tag ) {
 
+    for (auto& enemy : enemies ) {
+        enemy.mPosition.x += enemy.mSpeed.x;
+        enemy.mPosition.y += enemy.mSpeed.y;
+        
+        if ( updatePlayerSector(enemy.mPosition) == 0 ) {
+            enemy.mPosition.x -= enemy.mSpeed.x;
+            enemy.mPosition.y -= enemy.mSpeed.y;
+
+            enemy.mSpeed.x = FixP{(rand() % 32)} / FixP{1024} * ( (rand() % 2 ) ? FixP{-1} : FixP{1});
+            enemy.mSpeed.y = FixP{(rand() % 32)} / FixP{1024} * ( (rand() % 2 ) ? FixP{-1} : FixP{1});
+        }
+    }
+
 
 
     for ( auto& projectile : projectiles ) {
@@ -686,7 +669,56 @@ int32_t onProceeding() {
 }
 
 void onInitRoom(int room) {
-    enemies.emplace_back(P3D{FixP{0}, FixP{0}, FixP{15}});
+
+    numRooms = 7;
+    rooms = (Room *) malloc(sizeof(Room) * numRooms);
+    Room room0{Vec2i{-128, -128}, Vec2i{127, 127}, tableTexture, {0, 0, 0, 0, 0, 0}, -128, 128};
+
+    //1
+    Room room1{Vec2i{-2, 14}, Vec2i{3, 9}, noClueTexture, {2, 0, 0, 0, 0, 3}, -1, 1};
+
+    //2
+    Room room2{Vec2i{-2, 20}, Vec2i{3, 14}, clueTexture, {0, 4, 1, 6, 5, 0}, -1, 1};
+
+    //3
+    Room room3{Vec2i{-2, 14}, Vec2i{3, 9}, tableTexture, {0, 0, 0, 0, 1, 0}, 1, 5};
+
+    //4
+    Room room4{Vec2i{3, 20}, Vec2i{6, 14}, tableTexture, {0, 0, 0, 2, 0, 0}, -1, 1};
+
+    //5
+    Room room5{Vec2i{-2, 20}, Vec2i{3, 14}, tableTexture, {0, 0, 0, 0, 0, 2}, -2, -1};
+
+    //6
+    Room room6{Vec2i{-5, 20}, Vec2i{-2, 14}, tableTexture, {0, 2, 0, 0, 0, 0}, -1, 1};
+
+    memcpy(&rooms[0], &room0, sizeof(Room));
+    memcpy(&rooms[1], &room1, sizeof(Room));
+    memcpy(&rooms[2], &room2, sizeof(Room));
+    memcpy(&rooms[3], &room3, sizeof(Room));
+    memcpy(&rooms[4], &room4, sizeof(Room));
+    memcpy(&rooms[5], &room5, sizeof(Room));
+    memcpy(&rooms[6], &room6, sizeof(Room));
+
+
+    enemies.reserve(room);
+
+    for ( int c = 0; c < room; ++c ) {
+        FixP x;
+        FixP y;
+        FixP sx;
+        FixP sy;
+
+        sx =   FixP{(rand() % 32)} / FixP{1024} * ( (rand() % 2 ) ? FixP{-1} : FixP{1});
+        sy =   FixP{(rand() % 32)} / FixP{1024} * ( (rand() % 2 ) ? FixP{-1} : FixP{1});
+
+        do {
+            x = FixP{(rand() % 128)} / FixP{128};
+            y = FixP{(rand() % 128)} / FixP{128};
+        } while(updatePlayerSector(P3D{x, y, FixP{15}}) == 0);
+
+        enemies.emplace_back(P3D{x, y, FixP{15}}, P3D{ sx, sy, FixP{0}} );
+    }
 }
 
 int32_t onArriving() {
