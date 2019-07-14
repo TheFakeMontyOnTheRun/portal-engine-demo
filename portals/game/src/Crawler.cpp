@@ -555,11 +555,15 @@ int32_t onGamePlay(int32_t tag ) {
         projectile.mPosition.y += projectile.mSpeed.y;
         projectile.mPosition.z += projectile.mSpeed.z;
 
+        FixP half = FixP{1} / FixP{2};
+
         for ( auto& enemy : enemies ) {
-            if (projectile.mPosition.x == enemy.mPosition.x &&
-                projectile.mPosition.y == enemy.mPosition.y &&
-                static_cast<int>(projectile.mPosition.z) == static_cast<int>(enemy.mPosition.z) &&
+            if (
+                    ((projectile.mPosition.x - half) <= enemy.mPosition.x && enemy.mPosition.x <= (projectile.mPosition.x + half) ) &&
+                    ((projectile.mPosition.y - half) <= enemy.mPosition.y && enemy.mPosition.y <= (projectile.mPosition.y + half) ) &&
+                    static_cast<int>(projectile.mPosition.z) == static_cast<int>(enemy.mPosition.z) &&
                 projectile.mActive) {
+
                 enemy.mLife -= 20;
                 projectile.mActive = false;
             }
