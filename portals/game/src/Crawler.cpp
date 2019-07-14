@@ -482,7 +482,7 @@ void drawSpriteAt( const P3D& position, NativeBitmap* sprite) {
     {
         const FixP x0 = FixP{position.x} - half - camera.x;
         const FixP y0 = FixP{position.y} - half - camera.y;
-        const FixP z0 = FixP{position.z} - half - camera.z - FixP{8};
+        const FixP z0 = FixP{position.z} - half - camera.z;
 
         const FixP x1 = FixP{position.x} + half - camera.x;
         const FixP y1 = FixP{position.y} + half - camera.y;
@@ -533,11 +533,11 @@ void Crawler_repaintCallback(void) {
 }
 
 
-void updatePlayerSector() {
+int updatePlayerSector( const P3D& pos ) {
 
-    auto x = static_cast<int>(camera.x);
-    auto y = static_cast<int>(camera.y);
-    auto z = static_cast<int>(camera.z);
+    auto x = static_cast<int>(pos.x);
+    auto y = static_cast<int>(pos.y);
+    auto z = static_cast<int>(pos.z);
 
     if (z < 0) {
         z = 0;
@@ -547,23 +547,18 @@ void updatePlayerSector() {
         camera.z = FixP{z};
     }
 
-    z = z + 8;
-
     for (int c = 1; c < numRooms; ++c) {
         Room *room = &rooms[c];
 
-        if (room->p0.x < x && x <= room->p1.x &&
-            room->p1.y < z && z <= room->p0.y && //yes, it's reversed. I'm weird.
-            room->height0 < y && y <= room->height1
+        if (room->p0.x <= x && x <= room->p1.x &&
+            room->p1.y <= z && z <= room->p0.y && //yes, it's reversed. I'm weird.
+            room->height0 <= y && y <= room->height1
                 ) {
-
-            if (playerRoom != c) {
-                printf("Player is now at %d\n", c);
-                playerRoom = c;
-            }
-            return;
+            return c;
         }
     }
+
+    return 0;
 }
 
 
@@ -587,24 +582,22 @@ int32_t onGamePlay(int32_t tag ) {
 
     fireCooldown--;
 
+    P3D positionBackup{playerPosition};
+
     switch (tag) {
         case kCommandLeft:
-            camera.x -= FixP{1} / FixP{3};
             playerPosition.x -= FixP{1};
             break;
         case kCommandRight:
-            camera.x += FixP{1} / FixP{3};
             playerPosition.x += FixP{1};
             break;
         case kCommandBack:
             return menuStateToReturn;
         case kCommandDown:
-            camera.y += FixP{1} / FixP{3};
             playerPosition.y += FixP{1};
             break;
 
         case kCommandUp:
-            camera.y -= FixP{1} / FixP{3};
             playerPosition.y -= FixP{1};
             break;
 
@@ -624,7 +617,16 @@ int32_t onGamePlay(int32_t tag ) {
         default:
             break;
     }
-    updatePlayerSector();
+
+    camera.z = playerPosition.z - FixP{10};
+    camera.y =( (FixP{4} * playerPosition.y) / FixP{10});
+    camera.x = (playerPosition.x  * FixP{1}) / FixP{4} ;
+
+    printf("(%f, %f, %f) - (%f, %f, %f)\n", asFloat(camera.x), asFloat(camera.y), asFloat(camera.z), asFloat(playerPosition.x), asFloat(playerPosition.y), asFloat(playerPosition.z));
+
+    if ( updatePlayerSector(playerPosition) == 0 ) {
+        playerPosition = positionBackup;
+    }
 
     return -1;
 }
@@ -667,7 +669,7 @@ void onInitRoom(int room) {
 }
 
 int32_t onArriving() {
-    if (playerPosition.z < FixP{15}) {
+    if (playerPosition.z < FixP{10}) {
         playerPosition.z += FixP{1};
     } else {
         currentGameState = Battling;
