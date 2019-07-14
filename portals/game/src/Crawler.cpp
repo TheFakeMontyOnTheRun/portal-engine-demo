@@ -62,8 +62,6 @@ int32_t onGameOver();
 void onInitRoom(int i);
 
 Texture *wallTexture = NULL;
-Texture *doorOpenTexture = NULL;
-Texture *doorClosedTexture = NULL;
 Texture *tableTexture = NULL;
 Texture *clueTexture = NULL;
 Texture *noClueTexture = NULL;
@@ -107,8 +105,6 @@ int32_t Crawler_initStateCallback(int32_t tag, void *data) {
     ceilingTexture = makeTextureFrom(loadBitmap("res/floor.img"));
     targetTexture = makeTextureFrom(loadBitmap("res/target.img"));
     tableTexture = makeTextureFrom(loadBitmap("res/table.img"));
-    doorOpenTexture = makeTextureFrom(loadBitmap("res/dooro.img"));
-    doorClosedTexture = makeTextureFrom(loadBitmap("res/doorc.img"));
     clueTexture = makeTextureFrom(loadBitmap("res/clue.img"));
     noClueTexture = makeTextureFrom(loadBitmap("res/noclue.img"));
     playerSprite = makeTextureFrom(loadBitmap("res/player.img"));
