@@ -17,7 +17,7 @@ OBJ=	src/Main.o \
 	src/LoadBitmap.o
 
 $(TARGET): $(OBJ)
-	$(CC) -o$(TARGET) $(OBJ) $(LIBS)
+	$(CXX) -o$(TARGET) $(OBJ) $(LIBS)
 
 all: $(TARGET)
 
