@@ -631,11 +631,14 @@ int32_t onGamePlay(int32_t tag ) {
             break;
         case kCommandBack:
             return menuStateToReturn;
-        case kCommandDown:
+        case kCommandUp:
             playerAccel.y += FixP{1};
             break;
 
-        case kCommandUp:
+
+
+
+        case kCommandDown:
             playerAccel.y -= FixP{1};
             break;
 
