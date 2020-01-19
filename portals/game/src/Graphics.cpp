@@ -621,10 +621,15 @@ graphicsFill(int16_t x, int16_t y, uint16_t dx, uint16_t dy, uint8_t pixel) {
 	}
 
 	uint8_t *destination = &buffer[0];
+    int16_t _x = std::min<int16_t >( std::max<int16_t >( x, clippingRect.x0 ), clippingRect.x1 );
+    int16_t _dx = std::max<int16_t >(std::min<int16_t>( x + dx, clippingRect.x1 ), clippingRect.x0) - _x;
 
 	for (int16_t py = 0; py < dy; ++py) {
-		uint8_t *destinationLineStart = destination + (320 * (y + py)) + x;
-		memset(destinationLineStart, pixel, dx);
+	    if ( y < clippingRect.y0 || y > clippingRect.y1 ) {
+            continue;
+	    }
+		uint8_t *destinationLineStart = destination + (320 * (y + py)) + _x;
+		memset(destinationLineStart, pixel, _dx);
 	}
 }
 
