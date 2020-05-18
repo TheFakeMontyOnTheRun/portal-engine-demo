@@ -21,7 +21,7 @@ uint8_t lastCommand = kCommandNone;
 void eventsInit(void) {
 	transparency = 199;
 	SDL_Init(SDL_INIT_EVERYTHING);
-
+	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
 	window = SDL_CreateWindow( "Portals",
                                 SDL_WINDOWPOS_CENTERED,
                                 SDL_WINDOWPOS_CENTERED,
