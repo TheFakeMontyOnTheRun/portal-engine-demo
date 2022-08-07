@@ -69,3 +69,6 @@ portals/cmake-build-debug/CMakeFiles/portals.dir/flags.make
 portals/cmake-build-debug/CMakeFiles/portals.dir/link.txt
 portals/cmake-build-debug/CMakeFiles/portals.dir/progress.make
 portals/cmake-build-debug
+portals/CMakeFiles
+portals/cmake_install.cmake
+portals/CMakeCache.txt
